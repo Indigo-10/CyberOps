@@ -1,0 +1,19 @@
+# Get the path to the user's directory
+$userDirectory = $env:USERPROFILE
+
+# Get all hidden files in the user's directory
+$hiddenFiles = Get-ChildItem $userDirectory -Attributes Hidden -Recurse
+
+# Filter out files that are from Windows
+$nonWindowsHiddenFiles = $hiddenFiles | Where-Object { $_.FullName -notmatch "C:\\Windows\\" }
+
+# Filter out files with non-common extensions
+$commonExtensions = @(".txt", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".pdf", ".png", ".jpg", ".jpeg", ".gif", ".exe")
+$filteredFiles = $nonWindowsHiddenFiles | Where-Object { $commonExtensions -contains $_.Extension }
+
+# Output the name and path of the non-Windows hidden files
+foreach ($file in $filteredFiles)
+{
+    Write-Host $file.Name
+    Write-Host $file.FullName
+}
