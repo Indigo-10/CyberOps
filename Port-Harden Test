@@ -1,0 +1,38 @@
+function Harden-Firewall
+{
+    param(
+        [string]$registryPath = 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\SharedAccess\Parameters\FirewallPolicy\StandardProfile'
+    )
+
+    try
+    {
+        # Get the current firewall settings from the registry
+        $firewallSettings = Get-ItemProperty -Path $registryPath -ErrorAction Stop
+
+        # Get the list of known security risks
+        $securityRisks = @(
+            'FTP-Data',
+            'FTP-Server',
+            'HTTP-In',
+            'HTTP-Out',
+            'NetBIOS-NS',
+            'NetBIOS-SS',
+            'RDP-Tcp'
+        )
+
+        # Disable the firewall ports that are known security risks
+        foreach ($risk in $securityRisks)
+        {
+            $firewallSettings[$risk] = '0'
+        }
+
+        # Save the updated firewall settings to the registry
+        Set-ItemProperty -Path $registryPath -Value $firewallSettings -ErrorAction Stop
+
+        Write-Verbose "Firewall ports have been successfully hardened"
+    }
+    catch
+    {
+        Write-Error "An error occurred while hardening the firewall: $($_.Exception.Message)"
+    }
+}
